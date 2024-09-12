@@ -1,5 +1,5 @@
 {
-  "originHash" : "52af10517fd4162a7bb3384e8bdcddcf86b2638bb3890fb6f174da20fec94ff3",
+  "originHash" : "8324791f1fae8981c59cdb173e7ef637be0f14ebe032dc702f32b875d52f677b",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/4rays/http-request-client",
       "state" : {
-        "revision" : "f4f70ab7a70ab8c04a3286da0035c0dbd06e6785",
-        "version" : "1.1.0"
+        "revision" : "baeb071e90d47ecb4925fe20328bf3479106c6c1",
+        "version" : "1.1.1"
       }
     },
     {
@@ -35,6 +35,15 @@
       "state" : {
         "revision" : "58af7278797871e460d79496621b3e5366b865b2",
         "version" : "3.1.0"
+      }
+    },
+    {
+      "identity" : "pulse",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kean/Pulse.git",
+      "state" : {
+        "revision" : "7b36d6f11841cf3c428a4c1a5a37fe4a23ff3138",
+        "version" : "5.0.0"
       }
     },
     {

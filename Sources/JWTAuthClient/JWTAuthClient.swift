@@ -33,7 +33,7 @@ extension JWTAuthClient {
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
     timeoutInterval: TimeInterval = 60
-  ) async throws -> T where T: Decodable {
+  ) async throws -> SuccessResponse<T> where T: Decodable {
     @Dependency(\.userSessionClient) var userSessionClient
     @Dependency(\.httpRequestClient) var httpRequestClient
 
@@ -83,17 +83,17 @@ extension JWTAuthClient {
     }
   }
 
-  public func sendJWT<Success, Failure>(
+  public func sendJWT<T, ServerError>(
     _ request: Request,
     baseURL: String,
     retryingAuth: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
     timeoutInterval: TimeInterval = 60
-  ) async throws -> Result<Success, Failure>
+  ) async throws -> Response<T, ServerError>
   where
-    Success: Decodable,
-    Failure: Decodable
+    T: Decodable,
+    ServerError: Decodable
   {
     @Dependency(\.userSessionClient) var userSessionClient
     @Dependency(\.httpRequestClient) var httpRequestClient

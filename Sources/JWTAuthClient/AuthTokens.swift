@@ -58,27 +58,27 @@ extension AuthTokens {
     return jwt?.expiresAt
   }
 
-  public subscript(access claim: String) -> String? {
+  public subscript(string claim: String) -> String? {
     try? toJWT().claim(name: claim).string
   }
 
-  public subscript(access claim: String) -> Bool? {
+  public subscript(boolean claim: String) -> Bool? {
     try? toJWT().claim(name: claim).boolean
   }
 
-  public subscript(access claim: String) -> Int? {
+  public subscript(int claim: String) -> Int? {
     try? toJWT().claim(name: claim).integer
   }
 
-  public subscript(access claim: String) -> Double? {
+  public subscript(double claim: String) -> Double? {
     try? toJWT().claim(name: claim).double
   }
 
-  public subscript(access claim: String) -> Date? {
+  public subscript(date claim: String) -> Date? {
     try? toJWT().claim(name: claim).date
   }
 
-  public subscript(access claim: String) -> [String]? {
+  public subscript(strings claim: String) -> [String]? {
     try? toJWT().claim(name: claim).array
   }
 }

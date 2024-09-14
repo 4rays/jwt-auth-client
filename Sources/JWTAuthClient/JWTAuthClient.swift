@@ -40,7 +40,7 @@ extension JWTAuthClient {
     guard
       let tokens = try await userSessionClient.getTokens()
     else {
-      throw Error.missingToken
+      throw AuthTokens.Error.missingToken
     }
 
     do {
@@ -101,7 +101,7 @@ extension JWTAuthClient {
     guard
       let tokens = try await userSessionClient.getTokens()
     else {
-      throw Error.missingToken
+      throw AuthTokens.Error.missingToken
     }
 
     do {
@@ -140,11 +140,5 @@ extension JWTAuthClient {
     } catch {
       throw error
     }
-  }
-}
-
-extension JWTAuthClient {
-  public enum Error: Swift.Error {
-    case missingToken
   }
 }

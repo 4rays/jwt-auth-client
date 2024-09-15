@@ -1,6 +1,4 @@
-// swift-tools-version: 5.10
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
@@ -18,10 +16,10 @@ let package = Package(
       targets: ["JWTAuthClient"])
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.3.9"),
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.0"),
     .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
     .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.1.0"),
-    .package(url: "https://github.com/4rays/http-request-client", from: "1.1.1"),
+    .package(url: "https://github.com/4rays/http-request-client", from: "1.2.1"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -40,5 +38,6 @@ let package = Package(
       name: "JWTAuthClientTests",
       dependencies: ["JWTAuthClient"]
     ),
-  ]
+  ],
+  swiftLanguageModes: [.v6]
 )

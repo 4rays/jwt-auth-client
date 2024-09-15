@@ -1,5 +1,5 @@
 {
-  "originHash" : "8324791f1fae8981c59cdb173e7ef637be0f14ebe032dc702f32b875d52f677b",
+  "originHash" : "c178c6b230ef18017f2d30edf094e2cbd4e55cd265cf13c0ab0f6e5c89533110",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -13,10 +13,10 @@
     {
       "identity" : "http-request-builder",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/4rays/http-request-builder.git",
+      "location" : "https://github.com/4rays/http-request-builder",
       "state" : {
-        "revision" : "2bae20e0002b6a766628283c6b0616042f2b4c7b",
-        "version" : "1.0.3"
+        "revision" : "ed68534f8a1114da2b362685229e74cf9b363303",
+        "version" : "1.1.0"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/4rays/http-request-client",
       "state" : {
-        "revision" : "baeb071e90d47ecb4925fe20328bf3479106c6c1",
-        "version" : "1.1.1"
+        "revision" : "4c2128d3e60c04b758a36bd8062391076f4430b8",
+        "version" : "1.2.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-dependencies",
       "state" : {
-        "revision" : "3ef38bb702a1a2f39c7e19fc0578403b8ee52b17",
-        "version" : "1.3.9"
+        "revision" : "fd1fb25b68fdb9756cd61d23dbd9e2614b340085",
+        "version" : "1.4.0"
       }
     },
     {
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay",
       "state" : {
-        "revision" : "96beb108a57f24c8476ae1f309239270772b2940",
-        "version" : "1.2.5"
+        "revision" : "bc2a151366f2cd0e347274544933bc2acb00c9fe",
+        "version" : "1.4.0"
       }
     }
   ],

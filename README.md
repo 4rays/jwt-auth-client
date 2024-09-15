@@ -31,20 +31,20 @@ extension JWTAuthClient: DependencyKey {
 Once defined, you can use the following methods:
 
 ```swift
-public func sendJWT<T>(
+public func sendWithAuth<T>(
   _ request: Request,
   baseURL: String,
-  retryingAuth: Bool = true,
+  autoTokenRefresh: Bool = true,
   decoder: JSONDecoder = .init(),
   urlSession: URLSession = .shared,
   cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
   timeoutInterval: TimeInterval = 60
 ) async throws -> T where T: Decodable
 
-public func sendJWT<Success, Failure>(
+public func sendWithAuth<Success, Failure>(
   _ request: Request,
   baseURL: String,
-  retryingAuth: Bool = true,
+  autoTokenRefresh: Bool = true,
   urlSession: URLSession = .shared,
   cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
   timeoutInterval: TimeInterval = 60
@@ -52,7 +52,7 @@ public func sendJWT<Success, Failure>(
 where Success: Decodable, Failure: Decodable
 ```
 
-The `retryingAuth` parameter is used to determine if the client should retry the request if the token is expired.
+The `autoTokenRefresh` parameter is used to determine if the client should retry the request if the token is expired.
 If set to `false`, the client forwards the server error if the token is expired.
 
 ### User Session

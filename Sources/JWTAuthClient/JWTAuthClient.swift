@@ -25,14 +25,37 @@ extension JWTAuthClient: TestDependencyKey {
 }
 
 extension JWTAuthClient {
-  public func sendJWT<T>(
-    _ request: Request,
+  public func send<T>(
+    _ request: Request = .init(),
     baseURL: String,
-    retryingAuth: Bool = true,
     decoder: JSONDecoder = .init(),
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
-    timeoutInterval: TimeInterval = 60
+    timeoutInterval: TimeInterval = 60,
+    @RequestBuilder middleware: () -> RequestMiddleware = { identity }
+  ) async throws -> SuccessResponse<T> where T: Decodable {
+    @Dependency(\.httpRequestClient) var httpRequestClient
+
+    return try await httpRequestClient.send(
+      request,
+      baseURL: baseURL,
+      decoder: decoder,
+      urlSession: urlSession,
+      cachePolicy: cachePolicy,
+      timeoutInterval: timeoutInterval,
+      middleware: middleware
+    )
+  }
+
+  public func sendWithAuth<T>(
+    _ request: Request = .init(),
+    baseURL: String,
+    autoTokenRefresh: Bool = true,
+    decoder: JSONDecoder = .init(),
+    urlSession: URLSession = .shared,
+    cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
+    timeoutInterval: TimeInterval = 60,
+    @RequestBuilder middleware: () -> RequestMiddleware = { identity }
   ) async throws -> SuccessResponse<T> where T: Decodable {
     @Dependency(\.userSessionClient) var userSessionClient
     @Dependency(\.httpRequestClient) var httpRequestClient
@@ -59,21 +82,23 @@ extension JWTAuthClient {
         decoder: decoder,
         urlSession: urlSession,
         cachePolicy: cachePolicy,
-        timeoutInterval: timeoutInterval
+        timeoutInterval: timeoutInterval,
+        middleware: middleware
       )
     } catch HTTPRequestClient.Error.badResponse(let id, let code, let body) where code == 401 {
-      if retryingAuth {
+      if autoTokenRefresh {
         let newTokens = try await refresh(tokens.refresh)
         try await userSessionClient.set(.signedIn(newTokens))
 
-        return try await sendJWT(
+        return try await sendWithAuth(
           request,
           baseURL: baseURL,
-          retryingAuth: false,
+          autoTokenRefresh: false,
           decoder: decoder,
           urlSession: urlSession,
           cachePolicy: cachePolicy,
-          timeoutInterval: timeoutInterval
+          timeoutInterval: timeoutInterval,
+          middleware: middleware
         )
       } else {
         throw HTTPRequestClient.Error.badResponse(id, code, body)
@@ -83,13 +108,39 @@ extension JWTAuthClient {
     }
   }
 
-  public func sendJWT<T, ServerError>(
-    _ request: Request,
+  public func send<T, ServerError>(
+    _ request: Request = .init(),
     baseURL: String,
-    retryingAuth: Bool = true,
+    autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
-    timeoutInterval: TimeInterval = 60
+    timeoutInterval: TimeInterval = 60,
+    @RequestBuilder middleware: () -> RequestMiddleware = { identity }
+  ) async throws -> Response<T, ServerError>
+  where
+  T: Decodable,
+  ServerError: Decodable
+  {
+    @Dependency(\.httpRequestClient) var httpRequestClient
+
+    return try await httpRequestClient.send(
+      request,
+      baseURL: baseURL,
+      urlSession: urlSession,
+      cachePolicy: cachePolicy,
+      timeoutInterval: timeoutInterval,
+      middleware: middleware
+    )
+  }
+
+  public func sendWithAuth<T, ServerError>(
+    _ request: Request = .init(),
+    baseURL: String,
+    autoTokenRefresh: Bool = true,
+    urlSession: URLSession = .shared,
+    cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
+    timeoutInterval: TimeInterval = 60,
+    @RequestBuilder middleware: () -> RequestMiddleware = { identity }
   ) async throws -> Response<T, ServerError>
   where
     T: Decodable,
@@ -119,20 +170,22 @@ extension JWTAuthClient {
         baseURL: baseURL,
         urlSession: urlSession,
         cachePolicy: cachePolicy,
-        timeoutInterval: timeoutInterval
+        timeoutInterval: timeoutInterval,
+        middleware: middleware
       )
     } catch HTTPRequestClient.Error.badResponse(let id, let code, let body) where code == 401 {
-      if retryingAuth {
+      if autoTokenRefresh {
         let newTokens = try await refresh(tokens.refresh)
         try await userSessionClient.set(.signedIn(newTokens))
 
-        return try await sendJWT(
+        return try await sendWithAuth(
           request,
           baseURL: baseURL,
-          retryingAuth: false,
+          autoTokenRefresh: false,
           urlSession: urlSession,
           cachePolicy: cachePolicy,
-          timeoutInterval: timeoutInterval
+          timeoutInterval: timeoutInterval,
+          middleware: middleware
         )
       } else {
         throw HTTPRequestClient.Error.badResponse(id, code, body)

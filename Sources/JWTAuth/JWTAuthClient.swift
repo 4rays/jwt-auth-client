@@ -27,6 +27,12 @@ extension JWTAuthClient: TestDependencyKey {
 }
 
 extension JWTAuthClient {
+  public func refreshTokens(with refreshToken: String) async throws {
+    @Dependency(\.userSessionClient) var userSessionClient
+    let newTokens = try await refresh(refreshToken)
+    try await userSessionClient.set(.signedIn(newTokens))
+  }
+
   public func send<T>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),

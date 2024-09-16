@@ -7,6 +7,7 @@ import HTTPRequestClient
 @DependencyClient
 public struct JWTAuthClient: Sendable {
   public var refresh: @Sendable (_ refreshToken: String) async throws -> AuthTokens
+  public var baseURL: @Sendable () throws -> String
 }
 
 extension DependencyValues {
@@ -18,7 +19,8 @@ extension DependencyValues {
 
 extension JWTAuthClient: TestDependencyKey {
   public static let previewValue = Self(
-    refresh: { _ in .init(access: "access", refresh: "refresh") }
+    refresh: { _ in .init(access: "access", refresh: "refresh") },
+    baseURL: { "" }
   )
 
   public static let testValue = Self()
@@ -27,7 +29,6 @@ extension JWTAuthClient: TestDependencyKey {
 extension JWTAuthClient {
   public func send<T>(
     _ request: Request = .init(),
-    baseURL: String,
     decoder: JSONDecoder = .init(),
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
@@ -38,7 +39,7 @@ extension JWTAuthClient {
 
     return try await httpRequestClient.send(
       request,
-      baseURL: baseURL,
+      baseURL: try baseURL(),
       decoder: decoder,
       urlSession: urlSession,
       cachePolicy: cachePolicy,
@@ -49,7 +50,6 @@ extension JWTAuthClient {
 
   public func sendWithAuth<T>(
     _ request: Request = .init(),
-    baseURL: String,
     autoTokenRefresh: Bool = true,
     decoder: JSONDecoder = .init(),
     urlSession: URLSession = .shared,
@@ -78,7 +78,7 @@ extension JWTAuthClient {
     do {
       return try await httpRequestClient.send(
         bearerRequest,
-        baseURL: baseURL,
+        baseURL: try baseURL(),
         decoder: decoder,
         urlSession: urlSession,
         cachePolicy: cachePolicy,
@@ -92,7 +92,6 @@ extension JWTAuthClient {
 
         return try await sendWithAuth(
           request,
-          baseURL: baseURL,
           autoTokenRefresh: false,
           decoder: decoder,
           urlSession: urlSession,
@@ -110,7 +109,6 @@ extension JWTAuthClient {
 
   public func send<T, ServerError>(
     _ request: Request = .init(),
-    baseURL: String,
     autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
@@ -125,7 +123,7 @@ extension JWTAuthClient {
 
     return try await httpRequestClient.send(
       request,
-      baseURL: baseURL,
+      baseURL: try baseURL(),
       urlSession: urlSession,
       cachePolicy: cachePolicy,
       timeoutInterval: timeoutInterval,
@@ -135,7 +133,6 @@ extension JWTAuthClient {
 
   public func sendWithAuth<T, ServerError>(
     _ request: Request = .init(),
-    baseURL: String,
     autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
@@ -167,7 +164,7 @@ extension JWTAuthClient {
     do {
       return try await httpRequestClient.send(
         bearerRequest,
-        baseURL: baseURL,
+        baseURL: try baseURL(),
         urlSession: urlSession,
         cachePolicy: cachePolicy,
         timeoutInterval: timeoutInterval,
@@ -180,7 +177,6 @@ extension JWTAuthClient {
 
         return try await sendWithAuth(
           request,
-          baseURL: baseURL,
           autoTokenRefresh: false,
           urlSession: urlSession,
           cachePolicy: cachePolicy,

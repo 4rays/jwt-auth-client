@@ -10,6 +10,8 @@ Before using any clients, provide an instance of `SimpleKeychain` via a `liveVal
 extension SimpleKeychainClient: DependencyKey {
   static let liveValue = Self {
     // Your keychain logic here
+  } baseURL: {
+    "https://my-base-url.com"
   }
 }
 ```
@@ -31,24 +33,9 @@ extension JWTAuthClient: DependencyKey {
 Once defined, you can use the following methods:
 
 ```swift
-public func sendWithAuth<T>(
-  _ request: Request,
-  baseURL: String,
-  autoTokenRefresh: Bool = true,
-  decoder: JSONDecoder = .init(),
-  urlSession: URLSession = .shared,
-  cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
-  timeoutInterval: TimeInterval = 60
-) async throws -> T where T: Decodable
+public func sendWithAuth<T>(...) async throws -> T where T: Decodable
 
-public func sendWithAuth<Success, Failure>(
-  _ request: Request,
-  baseURL: String,
-  autoTokenRefresh: Bool = true,
-  urlSession: URLSession = .shared,
-  cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
-  timeoutInterval: TimeInterval = 60
-) async throws -> Result<Success, Failure>
+public func sendWithAuth<Success, Failure>(...) async throws -> Result<Success, Failure>
 where Success: Decodable, Failure: Decodable
 ```
 

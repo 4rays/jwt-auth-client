@@ -8,6 +8,16 @@ public struct UserSessionClient: Sendable {
   public var load: @Sendable () async throws -> UserSession
   public var destroy: @Sendable () async throws -> UserSession
 
+  public init(
+    save: @Sendable @escaping (AuthTokens) async throws -> UserSession,
+    load: @Sendable @escaping () async throws -> UserSession,
+    destroy: @Sendable @escaping () async throws -> UserSession
+  ) {
+    self.save = save
+    self.load = load
+    self.destroy = destroy
+  }
+
   @discardableResult
   @Sendable public func set(
     _ session: UserSession

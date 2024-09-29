@@ -14,6 +14,18 @@ public struct KeychainClient: Sendable {
     public static let accessToken: KeychainClient.Keys = Self(value: "accessToken")
     public static let refreshToken = Self(value: "refreshToken")
   }
+
+  public init(
+    save: @Sendable @escaping (_ value: String, _ as: Keys) async throws -> Void,
+    load: @Sendable @escaping (_ key: Keys) async -> String?,
+    delete: @Sendable @escaping (_ key: Keys) async -> Void,
+    reset: @Sendable @escaping () async -> Void
+  ) {
+    self.save = save
+    self.load = load
+    self.delete = delete
+    self.reset = reset
+  }
 }
 
 public enum KeychainError: LocalizedError, Equatable {

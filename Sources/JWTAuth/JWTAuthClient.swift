@@ -8,6 +8,14 @@ import HTTPRequestClient
 public struct JWTAuthClient: Sendable {
   public var refresh: @Sendable (_ refreshToken: String) async throws -> AuthTokens
   public var baseURL: @Sendable () throws -> String
+
+  public init(
+    refresh: @Sendable @escaping (_ refreshToken: String) async throws -> Authokens,
+    baseURL: @Sendable @escaping () throws -> String
+  ) {
+    self.refresh = refresh
+    self.baseURL = baseURL
+  }
 }
 
 extension DependencyValues {
@@ -122,8 +130,8 @@ extension JWTAuthClient {
     @RequestBuilder middleware: () -> RequestMiddleware = { identity }
   ) async throws -> Response<T, ServerError>
   where
-  T: Decodable,
-  ServerError: Decodable
+    T: Decodable,
+    ServerError: Decodable
   {
     @Dependency(\.httpRequestClient) var httpRequestClient
 

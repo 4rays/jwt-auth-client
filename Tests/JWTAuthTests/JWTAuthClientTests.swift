@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import JWTAuthClient
+@testable import JWTAuth
 
 final class JWTAuthClientTests: XCTestCase {
   func testUserSession() throws {

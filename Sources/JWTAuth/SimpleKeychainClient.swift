@@ -6,12 +6,6 @@ import SimpleKeychain
 @DependencyClient
 public struct SimpleKeychainClient: Sendable {
   public var keychain: @Sendable () throws -> SimpleKeychain
-
-  public init(
-    keychain: @Sendable @escaping () throws -> SimpleKeychain
-  ) {
-    self.keychain = keychain
-  }
 }
 
 extension DependencyValues {

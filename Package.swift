@@ -19,7 +19,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.0"),
     .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
     .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.1.0"),
-    .package(url: "https://github.com/4rays/http-request-client", from: "1.2.1"),
+    .package(url: "https://github.com/4rays/http-request-client", from: "1.2.3"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.

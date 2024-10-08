@@ -47,8 +47,8 @@ extension UserSessionClient: DependencyKey {
 
     @Sendable
     func persist(_ session: UserSession) async throws -> UserSession {
-      await keychainClient.delete(.accessToken)
-      await keychainClient.delete(.refreshToken)
+      try await keychainClient.delete(.accessToken)
+      try await keychainClient.delete(.refreshToken)
 
       if let token = session.tokens {
         try await keychainClient.save(token.access, .accessToken)

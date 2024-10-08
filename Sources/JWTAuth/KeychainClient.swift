@@ -5,9 +5,9 @@ import Foundation
 @DependencyClient
 public struct KeychainClient: Sendable {
   public var save: @Sendable (_ value: String, _ as: Keys) async throws -> Void
-  public var load: @Sendable (_ key: Keys) async -> String?
-  public var delete: @Sendable (_ key: Keys) async -> Void
-  public var reset: @Sendable () async -> Void
+  public var load: @Sendable (_ key: Keys) async throws -> String?
+  public var delete: @Sendable (_ key: Keys) async throws -> Void
+  public var reset: @Sendable () async throws -> Void
 
   public struct Keys: Hashable, Sendable {
     public let value: String
@@ -40,8 +40,8 @@ extension DependencyValues {
 
 extension KeychainClient {
   public func loadSession() async throws -> UserSession {
-    let accessToken = await load(.accessToken)
-    let refreshToken = await load(.refreshToken)
+    let accessToken = try await load(.accessToken)
+    let refreshToken = try await load(.refreshToken)
 
     guard
       let refreshToken,
@@ -75,11 +75,17 @@ extension KeychainClient: DependencyKey {
     @Dependency(\.simpleKeychainClient.keychain) var keychain
 
     return Self { value, key in
+      if try keychain().hasItem(forKey: key.value) {
+        try keychain().deleteItem(forKey: key.value)
+      }
+
       try keychain().set(value, forKey: key.value)
     } load: { key in
       try? keychain().string(forKey: key.value)
     } delete: { key in
-      try? keychain().deleteItem(forKey: key.value)
+      if try keychain().hasItem(forKey: key.value) {
+        try keychain().deleteItem(forKey: key.value)
+      }
     } reset: {
       try? keychain().deleteAll()
     }

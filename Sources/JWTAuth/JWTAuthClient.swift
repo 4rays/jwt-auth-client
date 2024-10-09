@@ -115,6 +115,7 @@ extension JWTAuthClient {
 
   public func send<T, ServerError>(
     _ request: Request = .init(),
+    decoder: JSONDecoder = .init(),
     autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
@@ -129,6 +130,7 @@ extension JWTAuthClient {
 
     return try await httpRequestClient.send(
       request,
+      decoder: decoder,
       baseURL: try baseURL(),
       urlSession: urlSession,
       cachePolicy: cachePolicy,
@@ -139,6 +141,7 @@ extension JWTAuthClient {
 
   public func sendWithAuth<T, ServerError>(
     _ request: Request = .init(),
+    decoder: JSONDecoder = .init(),
     autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
@@ -170,6 +173,7 @@ extension JWTAuthClient {
     do {
       return try await httpRequestClient.send(
         bearerRequest,
+        decoder: decoder,
         baseURL: try baseURL(),
         urlSession: urlSession,
         cachePolicy: cachePolicy,
@@ -183,6 +187,7 @@ extension JWTAuthClient {
 
         return try await sendWithAuth(
           request,
+          decoder: decoder,
           autoTokenRefresh: false,
           urlSession: urlSession,
           cachePolicy: cachePolicy,

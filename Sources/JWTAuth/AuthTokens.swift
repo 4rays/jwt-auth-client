@@ -43,7 +43,7 @@ extension AuthTokens {
   }
 
   @discardableResult
-  public func validate() throws -> JWT {
+  public func validateAccessToken() throws -> JWT {
     let jwt = try toJWT()
 
     if jwt.expired {

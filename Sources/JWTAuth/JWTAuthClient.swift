@@ -67,50 +67,31 @@ extension JWTAuthClient {
     @Dependency(\.httpRequestClient) var httpRequestClient
 
     guard
-      let tokens = try await userSessionClient.getTokens()
+      var tokens = try await userSessionClient.getTokens()
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    do {
-      try tokens.validate()
-    } catch {
-      try await userSessionClient.set(.signedOut)
-      throw error
+    if autoTokenRefresh {
+      do {
+        try tokens.validateAccessToken()
+      } catch {
+        tokens = try await refresh(tokens.refresh)
+        try await userSessionClient.set(.signedIn(tokens))
+      }
     }
 
     let bearerRequest = try bearerAuth(tokens.access)(request)
 
-    do {
-      return try await httpRequestClient.send(
-        bearerRequest,
-        baseURL: try baseURL(),
-        decoder: decoder,
-        urlSession: urlSession,
-        cachePolicy: cachePolicy,
-        timeoutInterval: timeoutInterval,
-        middleware: middleware
-      )
-    } catch HTTPRequestClient.Error.badResponse(let id, let code, let body) where code == 401 {
-      if autoTokenRefresh {
-        let newTokens = try await refresh(tokens.refresh)
-        try await userSessionClient.set(.signedIn(newTokens))
-
-        return try await sendWithAuth(
-          request,
-          autoTokenRefresh: false,
-          decoder: decoder,
-          urlSession: urlSession,
-          cachePolicy: cachePolicy,
-          timeoutInterval: timeoutInterval,
-          middleware: middleware
-        )
-      } else {
-        throw HTTPRequestClient.Error.badResponse(id, code, body)
-      }
-    } catch {
-      throw error
-    }
+    return try await httpRequestClient.send(
+      bearerRequest,
+      baseURL: try baseURL(),
+      decoder: decoder,
+      urlSession: urlSession,
+      cachePolicy: cachePolicy,
+      timeoutInterval: timeoutInterval,
+      middleware: middleware
+    )
   }
 
   public func send<T, ServerError>(
@@ -156,49 +137,30 @@ extension JWTAuthClient {
     @Dependency(\.httpRequestClient) var httpRequestClient
 
     guard
-      let tokens = try await userSessionClient.getTokens()
+      var tokens = try await userSessionClient.getTokens()
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    do {
-      try tokens.validate()
-    } catch {
-      try await userSessionClient.set(.signedOut)
-      throw error
+    if autoTokenRefresh {
+      do {
+        try tokens.validateAccessToken()
+      } catch {
+        tokens = try await refresh(tokens.refresh)
+        try await userSessionClient.set(.signedIn(tokens))
+      }
     }
 
     let bearerRequest = try bearerAuth(tokens.access)(request)
 
-    do {
-      return try await httpRequestClient.send(
-        bearerRequest,
-        decoder: decoder,
-        baseURL: try baseURL(),
-        urlSession: urlSession,
-        cachePolicy: cachePolicy,
-        timeoutInterval: timeoutInterval,
-        middleware: middleware
-      )
-    } catch HTTPRequestClient.Error.badResponse(let id, let code, let body) where code == 401 {
-      if autoTokenRefresh {
-        let newTokens = try await refresh(tokens.refresh)
-        try await userSessionClient.set(.signedIn(newTokens))
-
-        return try await sendWithAuth(
-          request,
-          decoder: decoder,
-          autoTokenRefresh: false,
-          urlSession: urlSession,
-          cachePolicy: cachePolicy,
-          timeoutInterval: timeoutInterval,
-          middleware: middleware
-        )
-      } else {
-        throw HTTPRequestClient.Error.badResponse(id, code, body)
-      }
-    } catch {
-      throw error
-    }
+    return try await httpRequestClient.send(
+      bearerRequest,
+      decoder: decoder,
+      baseURL: try baseURL(),
+      urlSession: urlSession,
+      cachePolicy: cachePolicy,
+      timeoutInterval: timeoutInterval,
+      middleware: middleware
+    )
   }
 }

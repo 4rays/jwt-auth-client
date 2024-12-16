@@ -39,7 +39,7 @@ extension DependencyValues {
 }
 
 extension KeychainClient {
-  public func loadSession() async throws -> UserSession {
+  public func loadTokens() async throws -> AuthTokens? {
     let accessToken = try await load(.accessToken)
     let refreshToken = try await load(.refreshToken)
 
@@ -47,15 +47,13 @@ extension KeychainClient {
       let refreshToken,
       let accessToken
     else {
-      return .signedOut
+      return nil
     }
 
-    let tokens = AuthTokens(
+    return AuthTokens(
       access: accessToken,
       refresh: refreshToken
     )
-
-    return .signedIn(tokens)
   }
 }
 
@@ -72,22 +70,22 @@ extension KeychainClient: TestDependencyKey {
 
 extension KeychainClient: DependencyKey {
   public static let liveValue = { () -> Self in
-    @Dependency(\.simpleKeychainClient.keychain) var keychain
+    @Dependency(\.simpleKeychain) var keychain
 
     return Self { value, key in
-      if try keychain().hasItem(forKey: key.value) {
-        try keychain().deleteItem(forKey: key.value)
+      if try keychain.hasItem(forKey: key.value) {
+        try keychain.deleteItem(forKey: key.value)
       }
 
-      try keychain().set(value, forKey: key.value)
+      try keychain.set(value, forKey: key.value)
     } load: { key in
-      try? keychain().string(forKey: key.value)
+      try? keychain.string(forKey: key.value)
     } delete: { key in
-      if try keychain().hasItem(forKey: key.value) {
-        try keychain().deleteItem(forKey: key.value)
+      if try keychain.hasItem(forKey: key.value) {
+        try keychain.deleteItem(forKey: key.value)
       }
     } reset: {
-      try? keychain().deleteAll()
+      try? keychain.deleteAll()
     }
   }()
 }

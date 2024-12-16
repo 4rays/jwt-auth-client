@@ -1,5 +1,6 @@
 import Foundation
 import JWTDecode
+import Sharing
 
 public struct AuthTokens: Codable, Hashable, Sendable {
   public var access: String
@@ -22,14 +23,9 @@ extension AuthTokens {
 
     public var errorDescription: String? {
       switch self {
-      case .missingToken:
-        return "The token seems to be missing."
-
-      case .invalidToken:
-        return "The token is invalid."
-
-      case .expiredToken:
-        return "The token is expired."
+      case .missingToken: "The token seems to be missing."
+      case .invalidToken: "The token is invalid."
+      case .expiredToken: "The token is expired."
       }
     }
 
@@ -80,5 +76,11 @@ extension AuthTokens {
 
   public subscript(strings claim: String) -> [String]? {
     try? toJWT().claim(name: claim).array
+  }
+}
+
+extension SharedKey where Self == InMemoryKey<AuthTokens?>.Default {
+  public static var sessionTokens: Self {
+    Self[.inMemory("sessionTokens"), default: nil]
   }
 }

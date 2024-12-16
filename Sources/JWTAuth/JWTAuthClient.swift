@@ -6,8 +6,8 @@ import HTTPRequestClient
 
 @DependencyClient
 public struct JWTAuthClient: Sendable {
-  public var refresh: @Sendable (_ refreshToken: String) async throws -> AuthTokens
   public var baseURL: @Sendable () throws -> String
+  public var refresh: @Sendable (_ authTokens: AuthTokens) async throws -> AuthTokens
 }
 
 extension DependencyValues {
@@ -19,18 +19,30 @@ extension DependencyValues {
 
 extension JWTAuthClient: TestDependencyKey {
   public static let previewValue = Self(
-    refresh: { _ in .init(access: "access", refresh: "refresh") },
-    baseURL: { "" }
+    baseURL: { "" },
+    refresh: { _ in .init(access: "access", refresh: "refresh") }
   )
 
   public static let testValue = Self()
 }
 
 extension JWTAuthClient {
-  public func refreshTokens(with refreshToken: String) async throws {
-    @Dependency(\.userSessionClient) var userSessionClient
-    let newTokens = try await refresh(refreshToken)
-    try await userSessionClient.set(.signedIn(newTokens))
+  /// Refreshes the tokens and persists them.
+  public func refreshExpiredTokens() async throws {
+    @Dependency(\.authTokensClient) var authTokensClient
+
+    guard
+      let oldTokens = try await authTokensClient.load()
+    else {
+      throw AuthTokens.Error.missingToken
+    }
+
+    do {
+      try oldTokens.validateAccessToken()
+    } catch {
+      let newTokens = try await refresh(oldTokens)
+      try await authTokensClient.set(newTokens)
+    }
   }
 
   public func send<T>(
@@ -54,50 +66,55 @@ extension JWTAuthClient {
     )
   }
 
-  public func sendWithAuth<T>(
+  public func sendAuthenticated<T>(
     _ request: Request = .init(),
-    autoTokenRefresh: Bool = true,
+    refreshExpiredToken: Bool = true,
     decoder: JSONDecoder = .init(),
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
     timeoutInterval: TimeInterval = 60,
     @RequestBuilder middleware: () -> RequestMiddleware = { identity }
   ) async throws -> SuccessResponse<T> where T: Decodable {
-    @Dependency(\.userSessionClient) var userSessionClient
+    @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
 
+    func sendRequest(with accessToken: String) async throws -> SuccessResponse<T> {
+      let bearerRequest = try bearerAuth(accessToken)(request)
+
+      return try await httpRequestClient.send(
+        bearerRequest,
+        baseURL: try baseURL(),
+        decoder: decoder,
+        urlSession: urlSession,
+        cachePolicy: cachePolicy,
+        timeoutInterval: timeoutInterval,
+        middleware: middleware
+      )
+    }
+
     guard
-      var tokens = try await userSessionClient.getTokens()
+      var tokens = try await authTokensClient.load()
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    if autoTokenRefresh {
+    if refreshExpiredToken {
       do {
         try tokens.validateAccessToken()
+        return try await sendRequest(with: tokens.access)
       } catch {
-        tokens = try await refresh(tokens.refresh)
-        try await userSessionClient.set(.signedIn(tokens))
+        tokens = try await refresh(tokens)
+        try await authTokensClient.set(tokens)
+        return try await sendRequest(with: tokens.access)
       }
+    } else {
+      return try await sendRequest(with: tokens.access)
     }
-
-    let bearerRequest = try bearerAuth(tokens.access)(request)
-
-    return try await httpRequestClient.send(
-      bearerRequest,
-      baseURL: try baseURL(),
-      decoder: decoder,
-      urlSession: urlSession,
-      cachePolicy: cachePolicy,
-      timeoutInterval: timeoutInterval,
-      middleware: middleware
-    )
   }
 
   public func send<T, ServerError>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),
-    autoTokenRefresh: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
     timeoutInterval: TimeInterval = 60,
@@ -120,10 +137,10 @@ extension JWTAuthClient {
     )
   }
 
-  public func sendWithAuth<T, ServerError>(
+  public func sendAuthenticated<T, ServerError>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),
-    autoTokenRefresh: Bool = true,
+    refreshExpiredToken: Bool = true,
     urlSession: URLSession = .shared,
     cachePolicy: URLRequest.CachePolicy = .useProtocolCachePolicy,
     timeoutInterval: TimeInterval = 60,
@@ -133,34 +150,40 @@ extension JWTAuthClient {
     T: Decodable,
     ServerError: Decodable
   {
-    @Dependency(\.userSessionClient) var userSessionClient
+    @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
 
+    func sendRequest(with accessToken: String) async throws -> Response<T, ServerError> {
+      let bearerRequest = try bearerAuth(accessToken)(request)
+
+      return try await httpRequestClient.send(
+        bearerRequest,
+        decoder: decoder,
+        baseURL: try baseURL(),
+        urlSession: urlSession,
+        cachePolicy: cachePolicy,
+        timeoutInterval: timeoutInterval,
+        middleware: middleware
+      )
+    }
+
     guard
-      var tokens = try await userSessionClient.getTokens()
+      var tokens = try await authTokensClient.load()
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    if autoTokenRefresh {
+    if refreshExpiredToken {
       do {
         try tokens.validateAccessToken()
+        return try await sendRequest(with: tokens.access)
       } catch {
-        tokens = try await refresh(tokens.refresh)
-        try await userSessionClient.set(.signedIn(tokens))
+        tokens = try await refresh(tokens)
+        try await authTokensClient.set(tokens)
+        return try await sendRequest(with: tokens.access)
       }
+    } else {
+      return try await sendRequest(with: tokens.access)
     }
-
-    let bearerRequest = try bearerAuth(tokens.access)(request)
-
-    return try await httpRequestClient.send(
-      bearerRequest,
-      decoder: decoder,
-      baseURL: try baseURL(),
-      urlSession: urlSession,
-      cachePolicy: cachePolicy,
-      timeoutInterval: timeoutInterval,
-      middleware: middleware
-    )
   }
 }

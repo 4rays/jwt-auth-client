@@ -17,6 +17,7 @@ let package = Package(
   ],
   dependencies: [
     .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.0"),
+    .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.1.0"),
     .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
     .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.1.0"),
     .package(url: "https://github.com/4rays/http-request-client", from: "1.2.4"),
@@ -27,17 +28,14 @@ let package = Package(
     .target(
       name: "JWTAuth",
       dependencies: [
-        .product(name: "JWTDecode", package: "JWTDecode.swift"),
         .product(name: "Dependencies", package: "swift-dependencies"),
         .product(name: "DependenciesMacros", package: "swift-dependencies"),
-        .product(name: "SimpleKeychain", package: "SimpleKeychain"),
         .product(name: "HTTPRequestClient", package: "http-request-client"),
+        .product(name: "JWTDecode", package: "JWTDecode.swift"),
+        .product(name: "Sharing", package: "swift-sharing"),
+        .product(name: "SimpleKeychain", package: "SimpleKeychain"),
       ]
-    ),
-    .testTarget(
-      name: "JWTAuthTests",
-      dependencies: ["JWTAuth"]
-    ),
+    )
   ],
   swiftLanguageModes: [.v6]
 )

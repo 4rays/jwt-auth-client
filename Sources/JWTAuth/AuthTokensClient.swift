@@ -6,7 +6,6 @@ import Sharing
 @DependencyClient
 public struct AuthTokensClient: Sendable {
   public var save: @Sendable (AuthTokens) async throws -> Void
-  public var load: @Sendable () async throws -> AuthTokens?
   public var destroy: @Sendable () async throws -> Void
 
   @Sendable public func set(
@@ -30,7 +29,6 @@ extension DependencyValues {
 extension AuthTokensClient: TestDependencyKey {
   public static let previewValue = Self(
     save: { _ in },
-    load: { nil },
     destroy: {}
   )
 
@@ -58,16 +56,19 @@ extension AuthTokensClient: DependencyKey {
       }
     }
 
+    func loadSession() async throws {
+      @Shared(.sessionTokens) var sessionTokens
+      let tokens = try await keychainClient.loadTokens()
+      $sessionTokens.withLock { $0 = tokens }
+    }
+
+    // Auto-load the session when the app starts
+    Task {
+      try await loadSession()
+    }
+
     return Self { token in
       try await persist(token)
-    } load: {
-      let tokens = try await keychainClient.loadTokens()
-
-      // Set the tokens in memory cache
-      @Shared(.sessionTokens) var sessionTokens
-      $sessionTokens.withLock { $0 = tokens }
-
-      return tokens
     } destroy: {
       try await persist(nil)
     }

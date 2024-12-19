@@ -3,6 +3,7 @@ import DependenciesMacros
 import Foundation
 import HTTPRequestBuilder
 import HTTPRequestClient
+import Sharing
 
 @DependencyClient
 public struct JWTAuthClient: Sendable {
@@ -30,9 +31,10 @@ extension JWTAuthClient {
   /// Refreshes the tokens and persists them.
   public func refreshExpiredTokens() async throws {
     @Dependency(\.authTokensClient) var authTokensClient
+    @Shared(.sessionTokens) var oldTokens
 
     guard
-      let oldTokens = try await authTokensClient.load()
+      let oldTokens
     else {
       throw AuthTokens.Error.missingToken
     }
@@ -77,6 +79,7 @@ extension JWTAuthClient {
   ) async throws -> SuccessResponse<T> where T: Decodable {
     @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
+    @Shared(.sessionTokens) var sessionTokens
 
     func sendRequest(with accessToken: String) async throws -> SuccessResponse<T> {
       let bearerRequest = try bearerAuth(accessToken)(request)
@@ -93,22 +96,22 @@ extension JWTAuthClient {
     }
 
     guard
-      var tokens = try await authTokensClient.load()
+      let sessionTokens
     else {
       throw AuthTokens.Error.missingToken
     }
 
     if refreshExpiredToken {
       do {
-        try tokens.validateAccessToken()
-        return try await sendRequest(with: tokens.access)
+        try sessionTokens.validateAccessToken()
+        return try await sendRequest(with: sessionTokens.access)
       } catch {
-        tokens = try await refresh(tokens)
-        try await authTokensClient.set(tokens)
-        return try await sendRequest(with: tokens.access)
+        let newTokens = try await refresh(sessionTokens)
+        try await authTokensClient.set(newTokens)
+        return try await sendRequest(with: newTokens.access)
       }
     } else {
-      return try await sendRequest(with: tokens.access)
+      return try await sendRequest(with: sessionTokens.access)
     }
   }
 
@@ -152,6 +155,7 @@ extension JWTAuthClient {
   {
     @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
+    @Shared(.sessionTokens) var sessionTokens
 
     func sendRequest(with accessToken: String) async throws -> Response<T, ServerError> {
       let bearerRequest = try bearerAuth(accessToken)(request)
@@ -168,22 +172,22 @@ extension JWTAuthClient {
     }
 
     guard
-      var tokens = try await authTokensClient.load()
+      let sessionTokens
     else {
       throw AuthTokens.Error.missingToken
     }
 
     if refreshExpiredToken {
       do {
-        try tokens.validateAccessToken()
-        return try await sendRequest(with: tokens.access)
+        try sessionTokens.validateAccessToken()
+        return try await sendRequest(with: sessionTokens.access)
       } catch {
-        tokens = try await refresh(tokens)
-        try await authTokensClient.set(tokens)
-        return try await sendRequest(with: tokens.access)
+        let newTokens = try await refresh(sessionTokens)
+        try await authTokensClient.set(newTokens)
+        return try await sendRequest(with: newTokens.access)
       }
     } else {
-      return try await sendRequest(with: tokens.access)
+      return try await sendRequest(with: sessionTokens.access)
     }
   }
 }

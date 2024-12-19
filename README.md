@@ -44,7 +44,7 @@ where Success: Decodable, Failure: Decodable
 The `refreshExpiredToken` parameter is used to determine if the client should retry the request if the token is expired.
 If set to `false`, the client forwards the server error if the token is expired.
 
-### Auth Tokens
+### Auth Tokens Client
 
 The `AuthTokensClient` is a client that handles the auth tokens via one of the following methods:
 
@@ -53,6 +53,11 @@ public var save: @Sendable (AuthTokens) async throws -> Void
 public var load: @Sendable () async throws -> AuthTokens?
 public var destroy: @Sendable () async throws -> Void
 ```
+
+You can access the current cached session using the `@Shared(.sessionTokens)` macro.
+
+> [!NOTE]
+> The session is automatically loaded when the app starts.
 
 ### Keychain Client
 

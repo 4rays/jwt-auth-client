@@ -80,10 +80,10 @@ extension AuthTokens {
   public subscript(strings claim: String) -> [String]? {
     try? toJWT().claim(name: claim).array
   }
-}
 
-extension SharedKey where Self == InMemoryKey<AuthTokens?>.Default {
-  public static var sessionTokens: Self {
-    Self[.inMemory("sessionTokens"), default: nil]
+  public func toSession() -> AuthTokenSession {
+    guard !isExpired
+    else { return .expired(self) }
+    return .valid(self)
   }
 }

@@ -28,23 +28,36 @@ extension JWTAuthClient: TestDependencyKey {
 }
 
 extension JWTAuthClient {
+  /// Load session into memory
+  public func loadSession() async throws {
+    @Shared(.authSession) var session
+    @Dependency(\.keychainClient) var keychainClient
+
+    guard
+      session == nil
+    else { return }
+
+    let tokens = try await keychainClient.loadTokens()
+    $session.withLock { $0 = tokens?.toSession() }
+  }
+
   /// Refreshes the tokens and persists them.
   public func refreshExpiredTokens() async throws {
     @Dependency(\.authTokensClient) var authTokensClient
-    @Shared(.sessionTokens) var oldTokens
+    @Shared(.authSession) var session
 
-    try await authTokensClient.load()
+    try await loadSession()
 
     guard
-      let oldTokens
+      let tokens = session?.tokens
     else {
       throw AuthTokens.Error.missingToken
     }
 
     do {
-      try oldTokens.validateAccessToken()
+      try tokens.validateAccessToken()
     } catch {
-      let newTokens = try await refresh(oldTokens)
+      let newTokens = try await refresh(tokens)
       try await authTokensClient.set(newTokens)
     }
   }
@@ -81,7 +94,7 @@ extension JWTAuthClient {
   ) async throws -> SuccessResponse<T> where T: Decodable {
     @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
-    @Shared(.sessionTokens) var sessionTokens
+    @Shared(.authSession) var session
 
     func sendRequest(with accessToken: String) async throws -> SuccessResponse<T> {
       let bearerRequest = try bearerAuth(accessToken)(request)
@@ -98,7 +111,7 @@ extension JWTAuthClient {
     }
 
     guard
-      let sessionTokens
+      let sessionTokens = session?.tokens
     else {
       throw AuthTokens.Error.missingToken
     }
@@ -157,7 +170,7 @@ extension JWTAuthClient {
   {
     @Dependency(\.authTokensClient) var authTokensClient
     @Dependency(\.httpRequestClient) var httpRequestClient
-    @Shared(.sessionTokens) var sessionTokens
+    @Shared(.authSession) var session
 
     func sendRequest(with accessToken: String) async throws -> Response<T, ServerError> {
       let bearerRequest = try bearerAuth(accessToken)(request)
@@ -174,7 +187,7 @@ extension JWTAuthClient {
     }
 
     guard
-      let sessionTokens
+      let sessionTokens = session?.tokens
     else {
       throw AuthTokens.Error.missingToken
     }

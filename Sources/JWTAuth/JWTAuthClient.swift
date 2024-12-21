@@ -33,6 +33,8 @@ extension JWTAuthClient {
     @Dependency(\.authTokensClient) var authTokensClient
     @Shared(.sessionTokens) var oldTokens
 
+    try await authTokensClient.load()
+
     guard
       let oldTokens
     else {

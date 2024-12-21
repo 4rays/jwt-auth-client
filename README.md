@@ -57,7 +57,8 @@ public var destroy: @Sendable () async throws -> Void
 You can access the current cached session using the `@Shared(.sessionTokens)` macro.
 
 > [!NOTE]
-> The session is automatically loaded when the app starts.
+> Unless you call the `refreshExpiredTokens` method on the `JWTAuthClient`,
+> you need to manually call the `load` method of `AuthTokensClient` to load the tokens.
 
 ### Keychain Client
 

@@ -38,8 +38,16 @@ extension AuthTokens {
     try decode(jwt: self.access)
   }
 
+  public var isExpired: Bool {
+    do {
+      return try validateAccessToken().expired
+    } catch {
+      return true
+    }
+  }
+
   @discardableResult
-  public func validateAccessToken() throws -> JWT {
+  func validateAccessToken() throws -> JWT {
     let jwt = try toJWT()
 
     if jwt.expired {
@@ -47,11 +55,6 @@ extension AuthTokens {
     }
 
     return jwt
-  }
-
-  public func expirationDate() -> Date? {
-    let jwt = try? toJWT()
-    return jwt?.expiresAt
   }
 
   public subscript(string claim: String) -> String? {

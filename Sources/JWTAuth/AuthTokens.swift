@@ -81,7 +81,7 @@ extension AuthTokens {
     try? toJWT().claim(name: claim).array
   }
 
-  public func toSession() -> AuthTokenSession {
+  public func toSession() -> AuthSession {
     guard !isExpired
     else { return .expired(self) }
     return .valid(self)

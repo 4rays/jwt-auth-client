@@ -1,12 +1,12 @@
 import Sharing
 
-public enum AuthTokenSession: Equatable, Sendable {
+public enum AuthSession: Equatable, Sendable {
   case missing
   case expired(AuthTokens)
   case valid(AuthTokens)
 }
 
-extension AuthTokenSession {
+extension AuthSession {
   public var isExpired: Bool {
     switch self {
     case .missing: false
@@ -24,7 +24,7 @@ extension AuthTokenSession {
   }
 }
 
-extension SharedKey where Self == InMemoryKey<AuthTokenSession?>.Default {
+extension SharedKey where Self == InMemoryKey<AuthSession?>.Default {
   public static var authSession: Self {
     Self[.inMemory("authSession"), default: nil]
   }

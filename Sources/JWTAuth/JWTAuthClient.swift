@@ -57,8 +57,12 @@ extension JWTAuthClient {
     do {
       try tokens.validateAccessToken()
     } catch {
-      let newTokens = try await refresh(tokens)
-      try await authTokensClient.set(newTokens)
+      do {
+        let newTokens = try await refresh(tokens)
+        try await authTokensClient.set(newTokens)
+      } catch {
+        try await authTokensClient.destroy()
+      }
     }
   }
 
@@ -110,24 +114,17 @@ extension JWTAuthClient {
       )
     }
 
+    if refreshExpiredToken {
+      try await refreshExpiredTokens()
+    }
+
     guard
       let sessionTokens = session?.tokens
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    if refreshExpiredToken {
-      do {
-        try sessionTokens.validateAccessToken()
-        return try await sendRequest(with: sessionTokens.access)
-      } catch {
-        let newTokens = try await refresh(sessionTokens)
-        try await authTokensClient.set(newTokens)
-        return try await sendRequest(with: newTokens.access)
-      }
-    } else {
-      return try await sendRequest(with: sessionTokens.access)
-    }
+    return try await sendRequest(with: sessionTokens.access)
   }
 
   public func send<T, ServerError>(
@@ -186,23 +183,16 @@ extension JWTAuthClient {
       )
     }
 
+    if refreshExpiredToken {
+      try await refreshExpiredTokens()
+    }
+
     guard
       let sessionTokens = session?.tokens
     else {
       throw AuthTokens.Error.missingToken
     }
 
-    if refreshExpiredToken {
-      do {
-        try sessionTokens.validateAccessToken()
-        return try await sendRequest(with: sessionTokens.access)
-      } catch {
-        let newTokens = try await refresh(sessionTokens)
-        try await authTokensClient.set(newTokens)
-        return try await sendRequest(with: newTokens.access)
-      }
-    } else {
-      return try await sendRequest(with: sessionTokens.access)
-    }
+    return try await sendRequest(with: sessionTokens.access)
   }
 }

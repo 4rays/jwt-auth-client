@@ -66,6 +66,16 @@ extension JWTAuthClient {
     }
   }
 
+  /// Sends an HTTP request and returns a successful response.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - decoder: The JSON decoder to use for decoding the response.
+  ///   - urlSession: The URL session to use for sending the request.
+  ///   - cachePolicy: The cache policy to use for the request.
+  ///   - timeoutInterval: The timeout interval for the request.
+  ///   - middleware: The middleware to apply to the request.
+  /// - Returns: A successful response containing the decoded data.
   public func send<T>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),
@@ -87,6 +97,17 @@ extension JWTAuthClient {
     )
   }
 
+  /// Sends an authenticated HTTP request and returns a successful response.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - refreshExpiredToken: Whether to refresh the access token if it has expired.
+  ///   - decoder: The JSON decoder to use for decoding the response.
+  ///   - urlSession: The URL session to use for sending the request.
+  ///   - cachePolicy: The cache policy to use for the request.
+  ///   - timeoutInterval: The timeout interval for the request.
+  ///   - middleware: The middleware to apply to the request.
+  /// - Returns: A successful response containing the decoded data.
   public func sendAuthenticated<T>(
     _ request: Request = .init(),
     refreshExpiredToken: Bool = true,
@@ -127,6 +148,16 @@ extension JWTAuthClient {
     return try await sendRequest(with: sessionTokens.access)
   }
 
+  /// Sends an HTTP request and returns a response with a success or error value.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - decoder: The JSON decoder to use for decoding the response.
+  ///   - urlSession: The URL session to use for sending the request.
+  ///   - cachePolicy: The cache policy to use for the request.
+  ///   - timeoutInterval: The timeout interval for the request.
+  ///   - middleware: The middleware to apply to the request.
+  /// - Returns: A response containing either the decoded success data or the decoded error data.
   public func send<T, ServerError>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),
@@ -152,6 +183,17 @@ extension JWTAuthClient {
     )
   }
 
+  /// Sends an authenticated HTTP request and returns a response with a success or error value.
+  ///
+  /// - Parameters:
+  ///   - request: The request to send.
+  ///   - decoder: The JSON decoder to use for decoding the response.
+  ///   - refreshExpiredToken: Whether to refresh the access token if it has expired.
+  ///   - urlSession: The URL session to use for sending the request.
+  ///   - cachePolicy: The cache policy to use for the request.
+  ///   - timeoutInterval: The timeout interval for the request.
+  ///   - middleware: The middleware to apply to the request.
+  /// - Returns: A response containing either the decoded success data or the decoded error data.
   public func sendAuthenticated<T, ServerError>(
     _ request: Request = .init(),
     decoder: JSONDecoder = .init(),

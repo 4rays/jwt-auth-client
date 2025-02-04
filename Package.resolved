@@ -1,5 +1,5 @@
 {
-  "originHash" : "25d970570ba1a9060b6cb9fd72a0fd4cfffc8a2ba305f65c39d597b2018deac7",
+  "originHash" : "1f44473154336544c2c0f7c642fd1ce453af827023c05652414fe295d8f99d6a",
   "pins" : [
     {
       "identity" : "combine-schedulers",
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/4rays/http-request-builder",
       "state" : {
-        "revision" : "ed68534f8a1114da2b362685229e74cf9b363303",
-        "version" : "1.1.0"
+        "revision" : "b7b20a6c5b71790633fd80c4b895f8125951e0ef",
+        "version" : "1.2.0"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/4rays/http-request-client",
       "state" : {
-        "revision" : "298f2d8a459257cc8d8f41adc1e9baaf1320a637",
-        "version" : "1.2.4"
+        "revision" : "8535e5a85e0f804b3129c1a51caa6e7027e55a49",
+        "version" : "1.3.0"
       }
     },
     {

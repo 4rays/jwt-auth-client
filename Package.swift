@@ -20,7 +20,7 @@ let package = Package(
     .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.1.0"),
     .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
     .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.1.0"),
-    .package(url: "https://github.com/4rays/http-request-client", from: "1.2.4"),
+    .package(url: "https://github.com/4rays/http-request-client", from: "1.3.0"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -35,7 +35,11 @@ let package = Package(
         .product(name: "Sharing", package: "swift-sharing"),
         .product(name: "SimpleKeychain", package: "SimpleKeychain"),
       ]
-    )
+    ),
+    .testTarget(
+      name: "JWTAuthTests",
+      dependencies: ["JWTAuth"]
+    ),
   ],
   swiftLanguageModes: [.v6]
 )

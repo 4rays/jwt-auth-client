@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
   name: "JWTAuth",
   platforms: [
-    .macOS(.v13),
+    .macOS(.v14),
     .iOS(.v17),
     .watchOS(.v9),
     .tvOS(.v17),
@@ -16,11 +16,11 @@ let package = Package(
       targets: ["JWTAuth"])
   ],
   dependencies: [
-    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.4.0"),
-    .package(url: "https://github.com/pointfreeco/swift-sharing", from: "1.1.0"),
-    .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
-    .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.1.0"),
-    .package(url: "https://github.com/4rays/http-request-client", from: "1.3.0"),
+    .package(url: "https://github.com/pointfreeco/swift-dependencies", from: "1.9.2"),
+    .package(url: "https://github.com/pointfreeco/swift-sharing", from: "2.5.2"),
+    .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.3.0"),
+    .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.3.0"),
+    .package(url: "https://github.com/indigo-ce/http-request-client", from: "1.4.0"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.

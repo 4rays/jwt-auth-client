@@ -1,6 +1,7 @@
-# JWTAuth
+# 🪻 jwt-auth-client
 
 A dependency client that handles JWT auth in apps using the Swift Composable Architecture (TCA).
+It is part of the [Indigo Stack](https://indigostack.org).
 
 ## SimpleKeychain
 
@@ -70,3 +71,7 @@ public var load: @Sendable (_ key: Keys) async -> String?
 public var delete: @Sendable (_ key: Keys) async -> Void
 public var reset: @Sendable () async -> Void
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

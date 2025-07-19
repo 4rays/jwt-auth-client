@@ -21,7 +21,7 @@ init() {
 A `liveValue` of the `JWTAuthClient` is required.
 
 ```swift
-extension JWTAuthClient: DependencyKey {
+extension JWTAuthClient: @retroactive DependencyKey {
   static let liveValue = Self(
     baseURL: {
       // Your base URL here

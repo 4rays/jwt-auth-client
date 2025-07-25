@@ -72,6 +72,32 @@ public var delete: @Sendable (_ key: Keys) async -> Void
 public var reset: @Sendable () async -> Void
 ```
 
+## Documentation
+
+This project uses [Swift-DocC](https://github.com/swiftlang/swift-docc-plugin) for documentation generation.
+
+### Viewing Documentation Online
+
+The latest documentation is automatically built and deployed [on GitHub Pages](https://indigo-ce.github.io/jwt-auth-client/)
+
+### Building Documentation Locally
+
+To generate static documentation:
+
+```bash
+swift package --allow-writing-to-directory ./docs \
+    generate-documentation --target JWTAuth --output-path ./docs \
+    --transform-for-static-hosting --hosting-base-path jwt-auth-client
+```
+
+### Previewing Documentation Locally
+
+To preview documentation with a local web server:
+
+```bash
+swift package --disable-sandbox preview-documentation --target JWTAuth
+```
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

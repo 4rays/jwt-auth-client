@@ -5,9 +5,68 @@ import HTTPRequestBuilder
 import HTTPRequestClient
 import Sharing
 
+/// A client for handling JWT-based authentication in Swift applications using TCA.
+///
+/// `JWTAuthClient` provides a comprehensive solution for managing JWT authentication,
+/// including token refresh, session management, and authenticated HTTP requests.
+///
+/// ## Overview
+///
+/// This client handles:
+/// - JWT token validation and refresh
+/// - Session persistence and loading
+/// - Authenticated HTTP requests with automatic token refresh
+/// - Integration with Swift Composable Architecture dependency system
+///
+/// ## Usage
+///
+/// ### Setting up the Client
+///
+/// ```swift
+/// extension JWTAuthClient: @retroactive DependencyKey {
+///   static let liveValue = Self(
+///     baseURL: { "https://api.example.com" },
+///     refresh: { tokens in
+///       // Your token refresh logic here
+///       return try await refreshTokensFromServer(tokens)
+///     }
+///   )
+/// }
+/// ```
+///
+/// ### Making Authenticated Requests
+///
+/// ```swift
+/// @Dependency(\.jwtAuthClient) var authClient
+///
+/// // Send authenticated request
+/// let response: SuccessResponse<UserProfile> = try await authClient.sendAuthenticated(
+///   .get("/profile")
+/// )
+/// ```
+///
+/// ### Loading Session
+///
+/// ```swift
+/// // Load session from keychain on app launch
+/// try await authClient.loadSession()
+/// ```
 @DependencyClient
 public struct JWTAuthClient: Sendable {
+  /// The base URL for API requests.
+  ///
+  /// This closure should return the base URL string for your API.
+  /// It's called each time a request is made, allowing for dynamic base URL configuration.
   public var baseURL: @Sendable () throws -> String
+  
+  /// Refreshes the provided authentication tokens.
+  ///
+  /// This closure should implement your token refresh logic, typically by calling
+  /// your API's token refresh endpoint with the provided refresh token.
+  ///
+  /// - Parameter authTokens: The current tokens to be refreshed
+  /// - Returns: New authentication tokens from the server
+  /// - Throws: An error if the refresh operation fails
   public var refresh: @Sendable (_ authTokens: AuthTokens) async throws -> AuthTokens
 }
 
@@ -28,7 +87,25 @@ extension JWTAuthClient: TestDependencyKey {
 }
 
 extension JWTAuthClient {
-  /// Load session into memory
+  /// Loads the authentication session from the keychain into memory.
+  ///
+  /// This method retrieves stored authentication tokens from the keychain and
+  /// loads them into the shared session state. It should typically be called
+  /// during app initialization to restore the user's authentication state.
+  ///
+  /// The method will only load the session if no session is currently in memory,
+  /// preventing unnecessary keychain operations.
+  ///
+  /// - Throws: An error if the keychain operation fails
+  ///
+  /// ## Usage
+  ///
+  /// ```swift
+  /// @Dependency(\.jwtAuthClient) var authClient
+  /// 
+  /// // Load session on app launch
+  /// try await authClient.loadSession()
+  /// ```
   public func loadSession() async throws {
     @Shared(.authSession) var session
     @Dependency(\.keychainClient) var keychainClient
@@ -41,7 +118,28 @@ extension JWTAuthClient {
     $session.withLock { $0 = tokens?.toSession() }
   }
 
-  /// Refreshes the tokens and persists them.
+  /// Refreshes expired authentication tokens and persists the new tokens.
+  ///
+  /// This method checks if the current access token is expired and, if so,
+  /// attempts to refresh it using the refresh token. The new tokens are
+  /// automatically persisted to the keychain and updated in the shared session.
+  ///
+  /// If the refresh operation fails (e.g., refresh token is also expired),
+  /// all authentication tokens are destroyed, effectively logging out the user.
+  ///
+  /// - Throws: `AuthTokens.Error.missingToken` if no tokens are available
+  ///
+  /// ## Usage
+  ///
+  /// ```swift
+  /// @Dependency(\.jwtAuthClient) var authClient
+  /// 
+  /// // Manually refresh tokens
+  /// try await authClient.refreshExpiredTokens()
+  /// ```
+  ///
+  /// > Important: This method is automatically called by `sendAuthenticated` methods
+  /// > when `refreshExpiredToken` is set to `true` (the default behavior).
   public func refreshExpiredTokens() async throws {
     @Dependency(\.authTokensClient) var authTokensClient
     @Shared(.authSession) var session

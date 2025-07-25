@@ -21,6 +21,7 @@ let package = Package(
     .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.3.0"),
     .package(url: "https://github.com/auth0/SimpleKeychain", from: "1.3.0"),
     .package(url: "https://github.com/indigo-ce/http-request-client", from: "1.4.0"),
+    .package(url: "https://github.com/swiftlang/swift-docc-plugin", from: "1.4.5"),
   ],
   targets: [
     // Targets are the basic building blocks of a package, defining a module or a test suite.

@@ -32,9 +32,13 @@ jobs:
 
       - name: Build DocC Documentation
         run: |
-          swift package --allow-writing-to-directory ./docs \
-            generate-documentation --target JWTAuth --output-path ./docs \
-            --transform-for-static-hosting --hosting-base-path jwt-auth-client
+          swift package \
+            --allow-writing-to-directory ./docs \
+            generate-documentation --target JWTAuth \
+            --disable-indexing \
+            --transform-for-static-hosting \
+            --hosting-base-path jwt-auth-client \
+            --output-path ./docs
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,7 +1,13 @@
 # 🪻 jwt-auth-client
 
-A dependency client that handles JWT auth in apps using the Swift Composable Architecture (TCA).
-It is part of the [Indigo Stack](https://indigostack.org).
+[![Build Status](https://github.com/indigo-ce/jwt-auth-client/actions/workflows/ci.yml/badge.svg)](https://github.com/indigo-ce/jwt-auth-client/actions)
+[![Documentation](https://img.shields.io/badge/documentation-DocC-blue.svg)](https://indigo-ce.github.io/jwt-auth-client/documentation/jwtauth/)
+[![Swift](https://img.shields.io/badge/swift-6.0+-orange.svg)](https://swift.org)
+
+A dependency client that handles JWT auth in Apple platform apps using the Swift Composable Architecture (TCA).
+This library is part of the [Indigo Stack](https://indigostack.org).
+
+Full documentation is [available here](https://indigo-ce.github.io/jwt-auth-client/documentation/jwtauth/).
 
 ## SimpleKeychain
 

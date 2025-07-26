@@ -40,6 +40,9 @@ jobs:
             --hosting-base-path jwt-auth-client \
             --output-path ./docs
 
+      - name: Create root redirect index.html
+        run: echo '<script>window.location.href += "/documentation/jwtauth/"</script>' > docs/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

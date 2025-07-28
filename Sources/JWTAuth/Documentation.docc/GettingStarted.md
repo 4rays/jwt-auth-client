@@ -1,10 +1,10 @@
 # Getting Started
 
-This guide will help you integrate the JWT Auth Client into your Swift application using The Composable Architecture (TCA).
+This guide will help you integrate `JWTAuthClient` into your TCA application.
 
 ## Installation
 
-Add the JWT Auth Client to your Swift package:
+Add the library to your Swift package:
 
 ```swift
 .package(url: "https://github.com/indigo-ce/jwt-auth-client", from: "1.0.0")
@@ -37,19 +37,20 @@ Create a live implementation of the `JWTAuthClient`:
 ```swift
 extension JWTAuthClient: @retroactive DependencyKey {
     static let liveValue = Self(
-        baseURL: { 
-            "https://your-api.com/api" 
+        baseURL: {
+            "https://your-api.com/api"
         },
         refresh: { tokens in
-            // Implement your token refresh logic
+            // Implement your token refresh logic here. For example:
             let request = URLRequest(url: URL(string: "https://your-api.com/api/auth/refresh")!)
             var request = request
             request.httpMethod = "POST"
             request.setValue("Bearer \(tokens.refresh)", forHTTPHeaderField: "Authorization")
-            
+
             let (data, _) = try await URLSession.shared.data(for: request)
             let refreshResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
-            
+
+            // Return new tokens
             return AuthTokens(
                 access: refreshResponse.accessToken,
                 refresh: refreshResponse.refreshToken
@@ -71,7 +72,7 @@ struct MyApp: App {
             ContentView()
                 .task {
                     @Dependency(\.jwtAuthClient) var authClient
-                    
+
                     do {
                         try await authClient.loadSession()
                     } catch {
@@ -90,7 +91,7 @@ Use the shared authentication session in your views and reducers:
 ```swift
 struct ContentView: View {
     @Shared(.authSession) var session
-    
+
     var body: some View {
         switch session {
         case .none, .some(.missing):
